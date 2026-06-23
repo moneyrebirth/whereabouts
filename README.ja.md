@@ -7,6 +7,7 @@ iPhoneアプリ [Overland](https://github.com/aaronpk/Overland-iOS) からGPS軌
 ## スクリーンショット
 
 <!-- スクショここに -->
+![Whereabouts Demo](screenshots/whereabouts_demo.png)
 
 ## 特徴
 

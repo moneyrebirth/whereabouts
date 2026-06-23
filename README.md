@@ -7,6 +7,7 @@ Whereabouts receives GPS tracks from [Overland](https://github.com/aaronpk/Overl
 ## Screenshots
 
 <!-- screenshots here -->
+![Whereabouts Demo](screenshots/whereabouts_demo.png)
 
 ## Features
 
