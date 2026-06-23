@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whereabouts</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+    #header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #181c27; border-bottom: 1px solid #2a2f3f; flex-shrink: 0; flex-wrap: wrap; }
+    #header h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7c9cff; }
+    #date-picker { background: #242838; border: 1px solid #3a3f55; color: #e0e0e0; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
+    #btn-today { background: #2a3060; border: 1px solid #4a5090; color: #9ab0ff; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    #btn-today:hover { background: #3a4080; }
+    .mode-btn { background: #242838; border: 1px solid #3a3f55; color: #8890aa; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .mode-btn.active { background: #2a3060; border-color: #4a5090; color: #9ab0ff; }
+    #stats { margin-left: auto; font-size: 12px; color: #8890aa; display: flex; gap: 16px; align-items: center; }
+    #map { flex: 1; width: 100%; }
+    #legend { position: absolute; bottom: 30px; left: 10px; z-index: 1000; background: rgba(15,17,23,0.85); border: 1px solid #2a2f3f; border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #8890aa; }
+    #legend .grad { width: 160px; height: 8px; border-radius: 4px; margin: 4px 0; }
+    #legend .grad-labels { display: flex; justify-content: space-between; font-size: 10px; color: #6070a0; }
+    #status { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(15,17,23,0.9); border: 1px solid #3a3f55; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #8890aa; display: none; }
+  </style>
+</head>
+<body>
+<div id="header">
+  <h1>Whereabouts</h1>
+  <input type="date" id="date-picker">
+  <button id="btn-today">Today</button>
+  <button id="btn-follow" style="background:#2a3060;border:1px solid #4a5090;color:#9ab0ff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">Follow ON</button>
+  <button class="mode-btn active" id="mode-time" data-mode="time">Time</button>
+  <button class="mode-btn" id="mode-speed" data-mode="speed">Speed</button>
+  <div id="stats">
+    <div id="stat-count">―  pts</div>
+    <div id="stat-last">―</div>
+  </div>
+</div>
+<div id="map"></div>
+<div id="status">Loading...</div>
+<div id="legend">
+  <div class="grad" id="legend-grad"></div>
+  <div class="grad-labels" id="legend-labels"><span>Night</span><span>Noon</span><span>Night</span></div>
+</div>
+<script>
+  const API_TOKEN = 'changeme'; // WHEREABOUTS_TOKEN に合わせて変更
+  const NOISE_THRESHOLD = 50000;
+  let colorMode = 'time';
+
+  const map = L.map('map').setView([35.68, 139.69], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 19
+  }).addTo(map);
+
+  let layers = [];
+  let lastPoints = null;
+
+  let followMode = true;
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('btn-follow').addEventListener('click', function() {
+      followMode = !followMode;
+      this.textContent = followMode ? 'Follow ON' : 'Follow OFF';
+      this.style.background = followMode ? '#2a3060' : '#242838';
+    });
+  });
+
+  function todayJST() {
+    const jst = new Date(Date.now() + 9*60*60*1000);
+    return jst.toISOString().slice(0, 10);
+  }
+
+  const picker = document.getElementById('date-picker');
+  picker.value = todayJST();
+  picker.addEventListener('change', () => fetchData(picker.value));
+  document.getElementById('btn-today').addEventListener('click', () => {
+    picker.value = todayJST();
+    fetchData(picker.value);
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      colorMode = btn.dataset.mode;
+      updateLegend();
+      if (lastPoints) render(lastPoints);
+    });
+  });
+
+  function updateLegend() {
+    const grad = document.getElementById('legend-grad');
+    const labels = document.getElementById('legend-labels');
+    if (colorMode === 'time') {
+      grad.style.background = 'linear-gradient(to right, hsl(0,95%,55%), hsl(60,95%,50%), hsl(120,95%,45%), hsl(180,95%,50%), hsl(240,95%,60%), hsl(300,95%,55%), hsl(360,95%,55%))';
+      labels.innerHTML = '<span>Night</span><span>Noon</span><span>Night</span>';
+    } else {
+      grad.style.background = 'linear-gradient(to right, hsl(220,90%,55%), hsl(140,90%,45%), hsl(60,90%,50%), hsl(0,90%,55%))';
+      labels.innerHTML = '<span>Stop</span><span>Walk</span><span>Bike</span><span>Car/Train</span>';
+    }
+  }
+  updateLegend();
+
+  function dist(p1, p2) {
+    const R = 6371000;
+    const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+    const dLng = (p2.lng - p1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(p1.lat*Math.PI/180)*Math.cos(p2.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function filterNoise(pts) {
+    if (!pts.length) return pts;
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      if (dist(out[out.length-1], pts[i]) < NOISE_THRESHOLD) out.push(pts[i]);
+    }
+    return out;
+  }
+
+  // Time帯カラー：滑らかな虹色（秒単位まで使用）
+  function timeToColor(ts) {
+    const dt = new Date(new Date(ts).getTime() + 9*60*60*1000);
+    const h = dt.getUTCHours() + dt.getUTCMinutes()/60 + dt.getUTCSeconds()/3600;
+    const hue = (h / 24) * 360;
+    return `hsl(${hue}, 95%, 55%)`;
+  }
+
+  // Speedカラー：Stop=青 → Walk=緑 → Bike=黄 → 車/電車=赤
+  function speedToColor(speedMps) {
+    if (speedMps === undefined || speedMps === null || speedMps < 0) return 'hsl(220,15%,45%)';
+    const kmh = speedMps * 3.6;
+    const capped = Math.min(kmh, 60);
+    const hue = 220 - (capped / 60) * 220; // 220(青)→0(赤)
+    return `hsl(${hue}, 90%, 55%)`;
+  }
+
+  function colorFor(p) {
+    return colorMode === 'time' ? timeToColor(p.timestamp) : speedToColor(p.speed);
+  }
+
+  function toJST(ts) {
+    return new Date(ts).toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  }
+
+  function setStatus(msg, show) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.display = show ? 'block' : 'none';
+  }
+
+  function render(pts) {
+    layers.forEach(l => map.removeLayer(l));
+    layers = [];
+
+    for (let i = 0; i < pts.length - 1; i++) {
+      const c = colorFor(pts[i]);
+      const seg = L.polyline([[pts[i].lat, pts[i].lng],[pts[i+1].lat, pts[i+1].lng]], {
+        color: c, weight: 3, opacity: 0.85
+      }).addTo(map);
+      layers.push(seg);
+    }
+
+    const fp = pts[0];
+    const lp = pts[pts.length-1];
+    const sm = L.circleMarker([fp.lat, fp.lng], {radius:8, color:'#fff', fillColor:'#4488ff', fillOpacity:1, weight:2})
+      .bindPopup('🚀 Start<br>' + toJST(fp.timestamp) + ' JST').addTo(map);
+    const em = L.circleMarker([lp.lat, lp.lng], {radius:9, color:'#fff', fillColor:'#ff4466', fillOpacity:1, weight:2})
+      .bindPopup('📍 Last<br>' + toJST(lp.timestamp) + ' JST').addTo(map);
+    layers.push(sm);
+    layers.push(em);
+
+    if (followMode) map.setView([lp.lat, lp.lng], 13);
+  }
+
+  async function fetchData(date) {
+    setStatus('Loading...', true);
+    try {
+      const res = await fetch('/api/today?date=' + date, {
+        headers: {'Authorization': 'Bearer ' + API_TOKEN}
+      });
+      const data = await res.json();
+      const raw = data.points;
+      if (!raw || raw.length === 0) {
+        setStatus(date + ' : No data', true);
+        layers.forEach(l => map.removeLayer(l));
+        layers = [];
+        lastPoints = null;
+        return;
+      }
+      const pts = filterNoise(raw);
+      lastPoints = pts;
+      render(pts);
+
+      const lp = pts[pts.length-1];
+      document.getElementById('stat-count').textContent = pts.length + ' pts';
+      document.getElementById('stat-last').textContent = 'Last: ' + toJST(lp.timestamp) + ' JST';
+      const removed = raw.length - pts.length;
+      setStatus(date + ': ' + pts.length + ' pts' + (removed > 0 ? ' (noise '+removed+' pts除去)' : ''), true);
+      setTimeout(() => setStatus('', false), 3000);
+    } catch(e) {
+      setStatus('エラー: ' + e.message, true);
+      console.error(e);
+    }
+  }
+
+  fetchData(picker.value);
+  setInterval(() => { if (picker.value === todayJST()) fetchData(picker.value); }, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description=Whereabouts Location Logger
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/path/to/whereabouts
+ExecStart=/usr/bin/python3 /path/to/whereabouts/locations.py
+Environment="WHEREABOUTS_TOKEN=changeme"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

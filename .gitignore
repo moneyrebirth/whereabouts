@@ -1,0 +1,27 @@
+# Personal data
+*.jsonl
+*.jsonl.gz
+summary/
+cron.log
+*.log
+
+# API keys
+.anthropic_key
+*.key
+.env
+
+# Generated HTML (personal location data)
+2026-*.html
+summary-*.html
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Backups
+*.bak
+*.back
+*.old
+*~
+locations.py.2*

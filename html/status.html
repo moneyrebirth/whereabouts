@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whereabouts - Status</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; padding: 24px; }
+    h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7c9cff; margin-bottom: 20px; }
+    .card { background: #181c27; border: 1px solid #2a2f3f; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .label { font-size: 11px; color: #6070a0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .value { font-size: 22px; font-weight: 700; color: #e0e0e0; }
+    .value.ok { color: #44cc88; }
+    .value.warn { color: #ffaa44; }
+    .sub { font-size: 12px; color: #8890aa; margin-top: 4px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    #updated { font-size: 11px; color: #4a5070; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Whereabouts / Status</h1>
+
+  <div class="card">
+    <div class="label">サービス状態</div>
+    <div class="value ok" id="status">確認中...</div>
+  </div>
+
+  <div class="card">
+    <div class="label">最終受信</div>
+    <div class="value" id="last-received">―</div>
+    <div class="sub" id="last-received-ago"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">今日の記録</div>
+      <div class="value" id="today-count">―</div>
+      <div class="sub">件</div>
+    </div>
+    <div class="card">
+      <div class="label">ログサイズ</div>
+      <div class="value" id="log-size">―</div>
+      <div class="sub">MB</div>
+    </div>
+  </div>
+
+  <div id="updated"></div>
+
+<script>
+  function timeAgo(jstStr) {
+    const then = new Date(jstStr.replace(' ', 'T') + '+09:00');
+    const diff = Math.floor((Date.now() - then) / 1000);
+    if (diff < 60) return diff + '秒前';
+    if (diff < 3600) return Math.floor(diff/60) + '分前';
+    if (diff < 86400) return Math.floor(diff/3600) + '時間前';
+    return Math.floor(diff/86400) + '日前';
+  }
+
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const d = await res.json();
+
+      document.getElementById('status').textContent = d.status === 'ok' ? '正常稼働中' : 'エラー';
+      document.getElementById('status').className = 'value ' + (d.status === 'ok' ? 'ok' : 'warn');
+      document.getElementById('last-received').textContent = d.last_received_jst;
+      document.getElementById('last-received-ago').textContent = timeAgo(d.last_received_jst);
+      document.getElementById('today-count').textContent = d.today_count.toLocaleString();
+      document.getElementById('log-size').textContent = d.log_size_mb;
+      document.getElementById('updated').textContent = '更新: ' + d.server_time_jst;
+    } catch(e) {
+      document.getElementById('status').textContent = '接続エラー';
+      document.getElementById('status').className = 'value warn';
+    }
+  }
+
+  fetchStatus();
+  setInterval(fetchStatus, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Whereabouts cron jobs
+# Run daily summary at 00:30 (generates previous day's summary)
+30 0 * * * cd /path/to/whereabouts && YESTERDAY=$(TZ='Asia/Tokyo' date -d yesterday +\%Y-\%m-\%d) && /usr/bin/python3 daily_summary.py $YESTERDAY >> cron.log 2>&1 && /usr/bin/python3 generate_html.py $YESTERDAY >> cron.log 2>&1
+
+# Update monthly summary
+31 0 * * * cd /path/to/whereabouts && /usr/bin/python3 generate_monthly.py >> cron.log 2>&1
+
+# Update monthly calendar
+32 0 * * * cd /path/to/whereabouts && /usr/bin/python3 generate_calendar.py >> cron.log 2>&1
