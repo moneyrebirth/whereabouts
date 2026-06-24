@@ -42,7 +42,23 @@ status.html           ← サービス稼働状況
 - nginx（VPSの場合）
 - [Anthropic APIキー](https://console.anthropic.com)（日次キーワード生成）
 
-## セットアップ
+## Quick start: fly.ioへの簡単デプロイ
+
+VPS などサーバ不要。fly.io なら 5 分でインストール完了!
+
+```bash
+git clone https://github.com/moneyrebirth/whereabouts
+cd whereabouts
+# Edit html/map.html and replace API_TOKEN value with your WHEREABOUTS_TOKEN
+# html/map.html をエディタで編集し、API_TOKEN をあなたの WHEREABOUTS_TOKEN に修正。
+fly auth login
+fly apps create your-app-name
+fly volumes create whereabouts_data --app your-app-name --region nrt --size 1
+fly secrets set WHEREABOUTS_TOKEN=your-secret-token
+fly deploy
+```
+
+## フルセットアップ (VPS) 
 
 ### 1. クローン
 
@@ -108,19 +124,6 @@ crontab -e
 32 0 * * * cd /path/to/whereabouts && python3 generate_calendar.py
 ```
 
-## fly.ioへのデプロイ
-
-```bash
-git clone https://github.com/moneyrebirth/whereabouts
-cd whereabouts
-# Edit html/map.html and replace API_TOKEN value with your WHEREABOUTS_TOKEN
-# html/map.html をエディタで編集し、API_TOKEN をあなたの WHEREABOUTS_TOKEN に修正。
-fly auth login
-fly apps create your-app-name
-fly volumes create whereabouts_data --app your-app-name --region nrt --size 1
-fly secrets set WHEREABOUTS_TOKEN=your-secret-token
-fly deploy
-```
 
 ## 拡張ポイント
 
