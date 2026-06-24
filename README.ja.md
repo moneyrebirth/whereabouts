@@ -111,10 +111,14 @@ crontab -e
 ## fly.ioへのデプロイ
 
 ```bash
+git clone https://github.com/moneyrebirth/whereabouts
+cd whereabouts
+# Edit html/map.html and replace API_TOKEN value with your WHEREABOUTS_TOKEN
+# html/map.html をエディタで編集し、API_TOKEN をあなたの WHEREABOUTS_TOKEN に修正。
 fly auth login
-fly apps create your-whereabouts
-fly volumes create whereabouts_data --region nrt --size 1
-fly secrets set API_TOKEN=your-token ANTHROPIC_API_KEY=your-key
+fly apps create your-app-name
+fly volumes create whereabouts_data --app your-app-name --region nrt --size 1
+fly secrets set WHEREABOUTS_TOKEN=your-secret-token
 fly deploy
 ```
 

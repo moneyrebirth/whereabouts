@@ -20,7 +20,7 @@ Whereabouts receives GPS tracks from [Overland](https://github.com/aaronpk/Overl
 ## Architecture
 
 
- \`\`\`
+```
 iPhone (Overland)
     ↓ HTTPS POST
 VPS or fly.io (nginx + Flask)
@@ -33,7 +33,7 @@ generate_html.py      ← Daily summary HTML
 generate_monthly.py   ← Monthly aggregation HTML
 generate_calendar.py  ← Monthly calendar HTML
 status.html           ← Service health dashboard
-\`\`\`
+```
 
 ## Requirements
 
@@ -50,9 +50,10 @@ No VPS needed. Deploy in 5 minutes.
 ```bash
 git clone https://github.com/moneyrebirth/whereabouts
 cd whereabouts
+# Edit html/map.html and replace API_TOKEN value with your WHEREABOUTS_TOKEN
 fly auth login
-fly apps create your-whereabouts
-fly volumes create whereabouts_data --region nrt --size 1
+fly apps create your-app-name
+fly volumes create whereabouts_data --app your-app-name --region nrt --size 1
 fly secrets set WHEREABOUTS_TOKEN=your-secret-token
 fly deploy
 ```
