@@ -14,7 +14,7 @@ import calendar
 LOG_FILE = '/var/log/locations.jsonl'
 JST = datetime.timezone(datetime.timedelta(hours=9))
 SUMMARY_DIR = '/home/dai/work/src/python/locations/summary'
-NOISE_THRESHOLD_M = 5000
+NOISE_THRESHOLD_M = 50000
 
 
 def haversine(p1, p2):
