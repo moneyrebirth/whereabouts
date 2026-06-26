@@ -25,3 +25,6 @@ __pycache__/
 *.old
 *~
 locations.py.2*
+
+# gpx files
+gpx/

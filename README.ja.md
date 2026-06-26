@@ -20,7 +20,7 @@ iPhoneアプリ [Overland](https://github.com/aaronpk/Overland-iOS) からGPS軌
 ## システム構成
 
 ```
-iPhone (Overland)
+iPhone / Android (Overland)
     ↓ HTTPS POST
 VPS or fly.io (nginx + Flask)
     ↓
@@ -115,7 +115,7 @@ location /api/status {
 
 ```bash
 # crontab.exampleを参考に設定
-crontab -e
+ocrontab -e
 ```
 
 ```
@@ -134,6 +134,15 @@ crontab -e
 **複数デバイスを色分けしたい** → `device_id` フィールドで分岐するだけ
 
 **Android対応** → [Overland Android](https://github.com/OpenHumans/overland_android) も同じAPIで動作
+
+## 応用事例
+
+- 📍 俺ログ (自分のための位置ログ)
+- 🚴 ロードバイクなど 速度に応じた色分け表示でルートを可視化
+- 🏔️ ハイキングの軌跡記録（GPXインポート対応）
+- 👨‍👩‍👧家族間での位置情報共有（マルチデバイス対応）
+- 🚗 車両追跡（フリート管理）
+
 
 ## ライセンス
 

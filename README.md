@@ -21,7 +21,7 @@ Whereabouts receives GPS tracks from [Overland](https://github.com/aaronpk/Overl
 
 
 ```
-iPhone (Overland)
+iPhone / Android (Overland)
     ↓ HTTPS POST
 VPS or fly.io (nginx + Flask)
     ↓
