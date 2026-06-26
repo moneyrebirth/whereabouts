@@ -93,6 +93,9 @@ def build_calendar(year, month):
 <div class="nav">
   <a href="map.html">🗺️ リアルタイム地図</a>
   <a href="status.html">📡 ステータス</a>
+
+  <a href="search.html">🔍 検索 </a>
+
 </div>
 
 </body>

@@ -8,6 +8,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; padding: 24px; }
     h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7c9cff; margin-bottom: 20px; }
+    .nav { display: flex; gap: 12px; margin-bottom: 20px; }
+    .nav a { color: #6070a0; text-decoration: none; font-size: 13px; }
+    .nav a:hover { color: #9ab0ff; }
     .card { background: #181c27; border: 1px solid #2a2f3f; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
     .label { font-size: 11px; color: #6070a0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
     .value { font-size: 22px; font-weight: 700; color: #e0e0e0; }
@@ -20,6 +23,11 @@
 </head>
 <body>
   <h1>Whereabouts / Status</h1>
+  <div class="nav">
+    <a href="map.html">🗺️ Map</a>
+    <a href="status.html">📡 Status</a>
+    <a href="search.html">🔍 Search</a>
+  </div>
 
   <div class="card">
     <div class="label">サービス状態</div>
@@ -78,5 +86,6 @@
   fetchStatus();
   setInterval(fetchStatus, 30000);
 </script>
+
 </body>
 </html>
