@@ -4,7 +4,7 @@ import json, datetime
 app = Flask(__name__)
 import os
 API_TOKEN = os.environ.get("WHEREABOUTS_TOKEN", "changeme")
-LOG_FILE = '/var/log/locations.jsonl'
+from config import LOG_FILE
 JST = datetime.timezone(datetime.timedelta(hours=9))
 
 @app.route('/api/locations', methods=['POST'])

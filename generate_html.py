@@ -8,7 +8,7 @@ import sys
 import datetime
 import math
 
-LOG_FILE = '/var/log/locations.jsonl'
+from config import LOG_FILE, SUMMARY_DIR, WEB_DIR
 JST = datetime.timezone(datetime.timedelta(hours=9))
 NOISE_THRESHOLD_M = 50000
 
@@ -184,7 +184,7 @@ def main(date_str=None):
     if date_str is None:
         date_str = datetime.datetime.now(JST).strftime('%Y-%m-%d')
 
-    summary_path = f'/home/dai/work/src/python/locations/summary/{date_str}.json'
+    summary_path = os.path.join(SUMMARY_DIR, f'{date_str}.json')
     try:
         with open(summary_path, 'r') as f:
             summary_data = json.load(f)
@@ -195,7 +195,7 @@ def main(date_str=None):
     track_points = load_track_points(date_str)
     html = build_html(date_str, summary_data, track_points)
 
-    out_path = f'/var/www/html_dai/whereabouts/summary-{date_str}.html'
+    out_path = os.path.join(WEB_DIR, f'summary-{date_str}.html')
     with open(out_path, 'w') as f:
         f.write(html)
     print(f'生成: {out_path}')

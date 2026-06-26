@@ -14,7 +14,8 @@ import datetime
 import requests
 import anthropic
 
-LOG_FILE = '/var/log/locations.jsonl'
+import os
+from config import LOG_FILE, SUMMARY_DIR, ANTHROPIC_KEY_FILE
 JST = datetime.timezone(datetime.timedelta(hours=9))
 
 NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse'
@@ -135,7 +136,7 @@ def generate_keywords(visits, date_str):
         for v in visits
     )
 
-    with open('/home/dai/.anthropic_key') as f:
+    with open(ANTHROPIC_KEY_FILE) as f:
         api_key = f.read().strip()
     client = anthropic.Anthropic(api_key=api_key)
     prompt = f"""以下は{date_str}に訪れた場所のリストです。
@@ -185,7 +186,7 @@ def main(date_str=None):
         'summary': summary_text,
     }
 
-    out_path = f'/home/dai/work/src/python/locations/summary/{date_str}.json'
+    out_path = os.path.join(SUMMARY_DIR, f'{date_str}.json')
     with open(out_path, 'w') as f:
         json.dump(result, f, ensure_ascii=False, indent=2, default=str)
     print(f'保存先: {out_path}')

@@ -9,7 +9,8 @@ import datetime
 import calendar
 import glob
 
-WHEREABOUTS_DIR = '/var/www/html_dai/whereabouts'
+from config import WEB_DIR
+WHEREABOUTS_DIR = WEB_DIR
 JST = datetime.timezone(datetime.timedelta(hours=9))
 
 

@@ -28,3 +28,8 @@ locations.py.2*
 
 # gpx files
 gpx/
+
+# mytools
+mytools/
+config.py
+config.py

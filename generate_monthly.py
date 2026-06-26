@@ -13,7 +13,7 @@ import calendar
 
 LOG_FILE = '/var/log/locations.jsonl'
 JST = datetime.timezone(datetime.timedelta(hours=9))
-SUMMARY_DIR = '/home/dai/work/src/python/locations/summary'
+from config import LOG_FILE, SUMMARY_DIR, WEB_DIR
 NOISE_THRESHOLD_M = 50000
 
 
@@ -204,7 +204,7 @@ def main(year=None, month=None):
 
     html = build_html(year, month, by_day, summaries, days_in_month)
 
-    out_path = f'/var/www/html_dai/whereabouts/{year}-{month:02d}.html'
+    out_path = os.path.join(WEB_DIR, f'{year}-{month:02d}.html')
     with open(out_path, 'w') as f:
         f.write(html)
     print(f'生成: {out_path}')
