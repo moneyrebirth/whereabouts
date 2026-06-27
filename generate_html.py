@@ -8,6 +8,7 @@ import sys
 import datetime
 import math
 
+import os
 from config import LOG_FILE, SUMMARY_DIR, WEB_DIR
 JST = datetime.timezone(datetime.timedelta(hours=9))
 NOISE_THRESHOLD_M = 50000
