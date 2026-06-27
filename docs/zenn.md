@@ -88,7 +88,7 @@ Android, iPhoneでの設定はたった2項目だけ。
    - **Server URL**: `https://your-server.com/api/locations`
    - **Access Token**: 設定した`WHEREABOUTS_TOKEN`の値
 
-![Overlandの設定画面](https://raw.github.com/moneyrebirth/whereabouts/main/screenshots/overland.png)
+<img src="https://raw.github.com/moneyrebirth/whereabouts/main/screenshots/overland.png" width="450">
 
 これだけ。あとはバックグラウンドで自動的に位置情報を送り続ける。
 
