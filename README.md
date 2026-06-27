@@ -16,6 +16,8 @@ Whereabouts receives GPS tracks from [Overland](https://github.com/aaronpk/Overl
 - **Fully automated** — cron generates daily and monthly summaries automatically.
 - **AI-powered summaries** — Claude API generates daily keywords and comments from visited places.
 - **Easily extensible** — Color modes, GPX import, multi-device support — each is just one function away.
+- **GPX import** — Import tracks from Geographica, YAMAP and other apps with duplicate check.
+- **Keyword search** — Search all daily summaries by place name, keyword, or date.
 
 ## Architecture
 
@@ -33,6 +35,9 @@ generate_html.py      ← Daily summary HTML
 generate_monthly.py   ← Monthly aggregation HTML
 generate_calendar.py  ← Monthly calendar HTML
 status.html           ← Service health dashboard
+gpx_import.py         ← GPX importer with duplicate check
+generate_search_index.py ← Search index generator
+html/search.html      ← Keyword & date search UI
 ```
 
 ## Requirements

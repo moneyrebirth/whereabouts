@@ -32,6 +32,9 @@ generate_html.py      ← 日次サマリーHTML
 generate_monthly.py   ← 月次集約HTML
 generate_calendar.py  ← 月次カレンダーHTML
 status.html           ← サービス稼働状況
+gpx_import.py         ← GPXインポーター（重複チェック付き）
+generate_search_index.py ← 検索インデックス生成
+html/search.html      ← キーワード・日付検索UI
 ```
 
 ## 必要なもの
