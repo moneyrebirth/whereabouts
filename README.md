@@ -63,12 +63,6 @@ fly secrets set WHEREABOUTS_TOKEN=your-secret-token
 fly deploy
 ```
 
-Set Overland's Server URL to `https://your-whereabouts.fly.dev/api/locations` and Access Token to `your WHEREABOUTS_TOKEN`.
-
-
-<img src="screenshots/overland.png" width="450">
-
-
 ## Full Setup (VPS)
 
 ### 1. Install
@@ -122,6 +116,8 @@ location /api/status {
 
 - Server URL: `https://yourserver.com/api/locations`
 - Access Token: your `WHEREABOUTS_TOKEN` value
+
+<img src="screenshots/overland.png" width="450">
 
 ### 6. cron
 

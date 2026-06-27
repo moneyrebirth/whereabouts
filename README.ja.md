@@ -114,7 +114,8 @@ location /api/status {
 - Server URL: `https://yourserver.com/api/locations`
 - Access Token: 設定したトークンを入力
 
-![overland](screenshots/overland.png)
+
+<img src="screenshots/overland.png" width="450">
 
 ### 6. cron設定
 
