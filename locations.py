@@ -27,33 +27,21 @@ def today():
     if not date_str:
         date_str = datetime.datetime.now(JST).strftime('%Y-%m-%d')
 
-    points = []
+    jst_start = datetime.datetime.strptime(date_str, '%Y-%m-%d').replace(tzinfo=JST)
+    jst_end = jst_start + datetime.timedelta(days=1)
+    utc_start = jst_start.astimezone(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    utc_end = jst_end.astimezone(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
     try:
-        with open(LOG_FILE, 'r') as f:
-            for line in f:
-                try:
-                    batch = json.loads(line)
-                    for loc in batch.get('locations', []):
-                        props = loc.get('properties', {})
-                        ts = props.get('timestamp', '')
-                        if not ts:
-                            continue
-                        dt = datetime.datetime.fromisoformat(ts.replace('Z', '+00:00'))
-                        dt_jst = dt.astimezone(JST)
-                        if dt_jst.strftime('%Y-%m-%d') == date_str:
-                            coords = loc['geometry']['coordinates']
-                            if coords != [0, 0]:
-                                points.append({
-                                    'lat': coords[1],
-                                    'lng': coords[0],
-                                    'timestamp': ts,
-                                    'speed': props.get('speed', -1),
-                                    'accuracy': props.get('horizontal_accuracy', 9999)
-                                })
-                except:
-                    continue
-    except FileNotFoundError:
-        pass
+        import duckdb
+        conn = duckdb.connect()
+        sql = f"SELECT locations.geometry.coordinates[2] as lat, locations.geometry.coordinates[1] as lng, locations.properties.timestamp as ts, locations.properties.speed as speed, locations.properties.horizontal_accuracy as accuracy, locations.properties.altitude as altitude FROM (SELECT unnest(locations) as locations FROM read_ndjson('{LOG_FILE}')) WHERE locations.properties.timestamp >= '{utc_start}' AND locations.properties.timestamp < '{utc_end}' AND locations.geometry.coordinates[1] != 0 ORDER BY ts"
+        rows = conn.execute(sql).fetchall()
+        conn.close()
+        points = [{'lat': r[0], 'lng': r[1], 'timestamp': r[2], 'speed': r[3] if r[3] is not None else -1, 'accuracy': r[4] if r[4] is not None else 9999, 'altitude': r[5] if r[5] is not None else 0} for r in rows if r[0] and r[1]]
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
     total = len(points)
     if total > 2000:
         indices = [int(i * total / 2000) for i in range(2000)]
