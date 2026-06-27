@@ -26,12 +26,12 @@ VPS or fly.io (nginx + Flask)
     ↓
 locations.jsonl
     ↓
-map.html              ← リアルタイム地図（60秒更新、時間/速度グラデーション）
+html/map.html              ← リアルタイム地図（60秒更新、時間/速度グラデーション）
 daily_summary.py      ← 訪問地検出 + Claude APIキーワード生成
 generate_html.py      ← 日次サマリーHTML
 generate_monthly.py   ← 月次集約HTML
 generate_calendar.py  ← 月次カレンダーHTML
-status.html           ← サービス稼働状況
+html/status.html           ← サービス稼働状況
 gpx_import.py         ← GPXインポーター（重複チェック付き）
 generate_search_index.py ← 検索インデックス生成
 html/search.html      ← キーワード・日付検索UI

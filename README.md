@@ -29,12 +29,12 @@ VPS or fly.io (nginx + Flask)
     ↓
 locations.jsonl
     ↓
-map.html              ← Real-time map (60s refresh, time/speed color gradient)
+html/map.html              ← Real-time map (60s refresh, time/speed color gradient)
 daily_summary.py      ← Place detection + Claude API keyword generation
 generate_html.py      ← Daily summary HTML
 generate_monthly.py   ← Monthly aggregation HTML
 generate_calendar.py  ← Monthly calendar HTML
-status.html           ← Service health dashboard
+html/status.html           ← Service health dashboard
 gpx_import.py         ← GPX importer with duplicate check
 generate_search_index.py ← Search index generator
 html/search.html      ← Keyword & date search UI
