@@ -64,7 +64,9 @@ fly deploy
 ```
 
 Set Overland's Server URL to `https://your-whereabouts.fly.dev/api/locations` and Access Token to `your WHEREABOUTS_TOKEN`.
-<img src="screenshots/overland.png" width="300">
+
+
+<img src="screenshots/overland.png" width="450">
 
 
 ## Full Setup (VPS)
