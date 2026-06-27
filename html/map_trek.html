@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whereabouts - Trek</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+    #header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #181c27; border-bottom: 1px solid #2a2f3f; flex-shrink: 0; flex-wrap: wrap; }
+    #header h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7c9cff; }
+    #date-picker { background: #242838; border: 1px solid #3a3f55; color: #e0e0e0; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
+    #stats { margin-left: auto; font-size: 12px; color: #8890aa; display: flex; gap: 16px; align-items: center; }
+    #map { flex: 1; width: 100%; }
+    #legend { position: absolute; bottom: 30px; left: 10px; z-index: 1000; background: rgba(15,17,23,0.85); border: 1px solid #2a2f3f; border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #8890aa; }
+    #legend .grad { width: 160px; height: 8px; border-radius: 4px; background: linear-gradient(to right, #2196F3, #4CAF50, #FF5722); margin: 4px 0; }
+    #legend .grad-labels { display: flex; justify-content: space-between; font-size: 10px; color: #6070a0; }
+    #status { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(15,17,23,0.9); border: 1px solid #3a3f55; border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #8890aa; display: none; }
+  </style>
+</head>
+<body>
+<div id="header">
+  <h1>Whereabouts Trek</h1>
+  <input type="date" id="date-picker">
+  <div id="stats">
+    <div id="stat-alt">― m</div>
+    <div id="stat-count">― pts</div>
+  </div>
+</div>
+<div id="map"></div>
+<div id="status">Loading...</div>
+<div id="legend">
+  <div class="grad"></div>
+  <div class="grad-labels" id="legend-labels"><span>Low</span><span>High</span></div>
+</div>
+
+<script>
+  const API_TOKEN = 'jkdfalPj38aP3Jalfdal';
+  const NOISE_THRESHOLD = 50000;
+
+  const map = L.map('map').setView([35.68, 139.69], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 19
+  }).addTo(map);
+
+  let layers = [];
+
+  function todayJST() {
+    const jst = new Date(Date.now() + 9*60*60*1000);
+    return jst.toISOString().slice(0, 10);
+  }
+
+  const picker = document.getElementById('date-picker');
+  picker.value = '2018-07-07';
+  picker.addEventListener('change', () => fetchData(picker.value));
+
+  function dist(p1, p2) {
+    const R = 6371000;
+    const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+    const dLng = (p2.lng - p1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(p1.lat*Math.PI/180)*Math.cos(p2.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function filterNoise(pts) {
+    if (!pts.length) return pts;
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      if (dist(out[out.length-1], pts[i]) < NOISE_THRESHOLD) out.push(pts[i]);
+    }
+    return out;
+  }
+
+  function altToColor(alt, minAlt, maxAlt) {
+    if (maxAlt === minAlt) return 'hsl(120, 80%, 50%)';
+    const t = (alt - minAlt) / (maxAlt - minAlt);
+    // 低い=青(240) → 中=緑(120) → 高い=赤(0)
+    const hue = 240 - t * 240;
+    const lightness = 45 + t * 15;
+    return `hsl(${hue}, 90%, ${lightness}%)`;
+  }
+
+  function toJST(ts) {
+    return new Date(ts).toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', hour:'2-digit', minute:'2-digit'});
+  }
+
+  function setStatus(msg, show) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.display = show ? 'block' : 'none';
+  }
+
+  async function fetchData(date) {
+    setStatus('Loading...', true);
+    layers.forEach(l => map.removeLayer(l));
+    layers = [];
+
+    try {
+      const res = await fetch('/api/today?date=' + date, {
+        headers: {'Authorization': 'Bearer ' + API_TOKEN}
+      });
+      const data = await res.json();
+      const raw = data.points;
+
+      if (!raw || raw.length === 0) {
+        setStatus(date + ': No data', true);
+        return;
+      }
+
+      const pts = filterNoise(raw);
+
+      // 標高の最小・最大を計算
+      const alts = pts.map(p => p.altitude || 0);
+      const minAlt = Math.min(...alts);
+      const maxAlt = Math.max(...alts);
+
+      // 凡例を更新
+      document.getElementById('legend-labels').innerHTML =
+        `<span>${Math.round(minAlt)}m</span><span>${Math.round(maxAlt)}m</span>`;
+
+      // 標高グラデーションでPolyline描画
+      for (let i = 0; i < pts.length - 1; i++) {
+        const avgAlt = ((pts[i].altitude || 0) + (pts[i+1].altitude || 0)) / 2;
+        const c = altToColor(avgAlt, minAlt, maxAlt);
+        const seg = L.polyline(
+          [[pts[i].lat, pts[i].lng], [pts[i+1].lat, pts[i+1].lng]],
+          {color: c, weight: 4, opacity: 0.9}
+        ).addTo(map);
+        layers.push(seg);
+      }
+
+      // 出発・最終マーカー
+      const fp = pts[0];
+      const lp = pts[pts.length-1];
+      const sm = L.circleMarker([fp.lat, fp.lng], {radius:8, color:'#fff', fillColor:'#4488ff', fillOpacity:1, weight:2})
+        .bindPopup(`🚀 Start<br>${toJST(fp.timestamp)}<br>${Math.round(fp.altitude||0)}m`).addTo(map);
+      const em = L.circleMarker([lp.lat, lp.lng], {radius:9, color:'#fff', fillColor:'#ff4466', fillOpacity:1, weight:2})
+        .bindPopup(`🏔️ End<br>${toJST(lp.timestamp)}<br>${Math.round(lp.altitude||0)}m`).addTo(map);
+      layers.push(sm);
+      layers.push(em);
+
+      map.setView([fp.lat, fp.lng], 13);
+
+      document.getElementById('stat-alt').textContent = `${Math.round(minAlt)}〜${Math.round(maxAlt)}m`;
+      document.getElementById('stat-count').textContent = `${pts.length} pts`;
+      setStatus(`${date}: ${pts.length} pts`, true);
+      setTimeout(() => setStatus('', false), 3000);
+
+    } catch(e) {
+      setStatus('Error: ' + e.message, true);
+      console.error(e);
+    }
+  }
+
+  fetchData(picker.value);
+</script>
+</body>
+</html>
