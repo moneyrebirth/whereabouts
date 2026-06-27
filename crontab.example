@@ -7,3 +7,6 @@
 
 # Update monthly calendar
 32 0 * * * cd /path/to/whereabouts && /usr/bin/python3 generate_calendar.py >> cron.log 2>&1
+
+# Update Search index
+33 0 * * * cd /path/to/whereabouts  && /usr/bin/python3 generate_search_index.py >> cron.log 2>&1

@@ -39,7 +39,7 @@ def main():
             'keywords': keywords,
             'comment': comment,
             'places': places,
-            'search_text': f'{keywords} {comment} {" ".join(places)}'.lower()
+            'search_text': f'{date} {keywords} {comment} {" ".join(places)}'.lower()
         })
 
     with open(OUTPUT, 'w') as f:

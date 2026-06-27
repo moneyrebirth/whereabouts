@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whereabouts - Search</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; padding: 24px; }
+    h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7c9cff; margin-bottom: 20px; }
+    #search-box { width: 100%; max-width: 500px; background: #181c27; border: 1px solid #3a3f55; color: #e0e0e0; padding: 10px 16px; border-radius: 8px; font-size: 15px; margin-bottom: 20px; outline: none; }
+    #search-box:focus { border-color: #7c9cff; }
+    #stats { font-size: 12px; color: #6070a0; margin-bottom: 16px; }
+    .result { background: #181c27; border: 1px solid #2a2f3f; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 16px; align-items: flex-start; }
+    .result-date { font-size: 13px; color: #7c9cff; font-weight: 600; min-width: 90px; }
+    .result-body { flex: 1; }
+    .result-keywords { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+    .tag { background: #2a3060; color: #9ab0ff; padding: 2px 10px; border-radius: 12px; font-size: 11px; }
+    .result-comment { font-size: 13px; color: #c0c8e0; }
+    .result-link { font-size: 12px; color: #4a5090; text-decoration: none; margin-top: 6px; display: inline-block; }
+    .result-link:hover { color: #7c9cff; }
+    #no-results { color: #4a5070; font-size: 14px; display: none; }
+    .nav { display: flex; gap: 12px; margin-bottom: 20px; }
+    .nav a { color: #6070a0; text-decoration: none; font-size: 13px; }
+    .nav a:hover { color: #9ab0ff; }
+  </style>
+</head>
+<body>
+  <h1>Whereabouts / Search</h1>
+  <div class="nav">
+    <a href="map.html">🗺️ Map</a>
+    <a href="status.html">📡 Status</a>
+    <a href="2026-06-calendar.html">📅 Calendar</a>
+  </div>
+  <input type="text" id="search-box" placeholder="Search by keyword, place, comment..." autofocus>
+  <div id="stats"></div>
+  <div id="results"></div>
+  <div id="no-results">No results found.</div>
+
+<script>
+  let index = [];
+
+  async function loadIndex() {
+    const res = await fetch('search_index.json');
+    index = await res.json();
+    document.getElementById('stats').textContent = `${index.length} days indexed`;
+    renderResults('');
+  }
+
+  function renderResults(query) {
+    const q = query.toLowerCase().trim();
+    const filtered = q
+      ? index.filter(d => d.search_text.includes(q))
+      : index.slice().reverse(); // 新しい順
+
+    const resultsEl = document.getElementById('results');
+    const noResults = document.getElementById('no-results');
+
+    if (filtered.length === 0) {
+      resultsEl.innerHTML = '';
+      noResults.style.display = 'block';
+      document.getElementById('stats').textContent = 'No results';
+      return;
+    }
+
+    noResults.style.display = 'none';
+    document.getElementById('stats').textContent = q
+      ? `${filtered.length} results for "${query}"`
+      : `${index.length} days indexed`;
+
+    resultsEl.innerHTML = filtered.map(d => {
+      const tags = d.keywords
+        ? d.keywords.split(',').map(k => `<span class="tag">${k.trim()}</span>`).join('')
+        : '';
+      return `
+        <div class="result">
+          <div class="result-date">${d.date}</div>
+          <div class="result-body">
+            <div class="result-keywords">${tags}</div>
+            <div class="result-comment">${d.comment}</div>
+            <a class="result-link" href="summary-${d.date}.html">→ View map</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('search-box').addEventListener('input', e => {
+    renderResults(e.target.value);
+  });
+
+  loadIndex();
+</script>
+</body>
+</html>

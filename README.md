@@ -67,7 +67,7 @@ Set Overland's Server URL to `https://your-whereabouts.fly.dev/api/locations` an
 ```bash
 git clone https://github.com/moneyrebirth/whereabouts
 cd whereabouts
-pip install flask requests anthropic
+pip install flask requests anthropic duckdb
 ```
 
 ### 2. Configure
