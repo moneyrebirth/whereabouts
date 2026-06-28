@@ -30,26 +30,7 @@
   <div class="nav">
     <a href="map.html">🗺️ Map</a>
     <a href="status.html">📡 Status</a>
-    <a class="calendar-link" href="2022-04-calendar.html">📅 Calendar</a>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // 1. 今日の日付から「YYYY-MM」の形式を作成
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const currentYearMonth = `${year}-${month}`; // 2026年6月なら "2026-06"
-
-      // 2. クラス名「calendar-link」が付いた要素を取得
-      const calendarLink = document.querySelector('.calendar-link');
-      
-      if (calendarLink) {
-        // 3. 元の href（2022-04-calendar.html）から、新href（2026-06-calendar.html）を作成して置き換え
-        const oldHref = calendarLink.getAttribute('href');
-        calendarLink.href = oldHref.replace('2022-04', currentYearMonth);
-      }
-    });
-  </script>
+    <a href="archive.html">📅 Archive</a>
   </div>
   <input type="text" id="search-box" placeholder="Search by keyword, place, comment..." autofocus>
   <div id="stats"></div>

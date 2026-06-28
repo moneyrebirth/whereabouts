@@ -10,3 +10,4 @@
 
 # Update Search index
 33 0 * * * cd /path/to/whereabouts  && /usr/bin/python3 generate_search_index.py >> cron.log 2>&1
+34 0 * 1 * cd /path/to/whereabouts  && /usr/bin/python3 generate_archive.py >> cron.log 2>&1

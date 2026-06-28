@@ -34,6 +34,7 @@ daily_summary.py      ← Place detection + Claude API keyword generation
 generate_html.py      ← Daily summary HTML
 generate_monthly.py   ← Monthly aggregation HTML
 generate_calendar.py  ← Monthly calendar HTML
+generate_archive.py   ← Monthly calendar archive HTML
 html/status.html           ← Service health dashboard
 gpx_import.py         ← GPX importer with duplicate check
 generate_search_index.py ← Search index generator
