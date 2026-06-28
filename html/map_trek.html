@@ -27,6 +27,9 @@
   <div id="stats">
     <div id="stat-alt">― m</div>
     <div id="stat-count">― pts</div>
+    <a href="map.html" style="font-size:11px; color:#4a5070; text-decoration:none;">🗺️ </a>
+    <a href="status.html" style="font-size:11px; color:#4a5070; text-decoration:none;">📡</a>
+    <a href="search.html" style="font-size:11px; color:#4a5070; text-decoration:none;">🔍</a>
   </div>
 </div>
 <div id="map"></div>
@@ -37,7 +40,7 @@
 </div>
 
 <script>
-  const API_TOKEN = 'jkdfalPj38aP3Jalfdal';
+  const API_TOKEN = 'changeme' // Replace with your WHEREABOUTS_TOKEN;
   const NOISE_THRESHOLD = 50000;
 
   const map = L.map('map').setView([35.68, 139.69], 11);
@@ -53,7 +56,7 @@
   }
 
   const picker = document.getElementById('date-picker');
-  picker.value = '2018-07-07';
+  // picker.value = '2018-07-07';
   picker.addEventListener('change', () => fetchData(picker.value));
 
   function dist(p1, p2) {
