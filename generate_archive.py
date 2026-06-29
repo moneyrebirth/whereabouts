@@ -22,6 +22,7 @@ def main():
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whereabouts - Archive</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{ font-family: 'Helvetica Neue', Arial, sans-serif; background: #0f1117; color: #e0e0e0; padding: 24px; }}
@@ -38,7 +39,7 @@ def main():
 <body>
   <h1>Whereabouts / Archive</h1>
   <div class="nav">
-    <a href="map.html">🗺️ Map</a>
+    <a href="map.html">📍 Map</a>
     <a href="status.html">📡 Status</a>
     <a href="search.html">🔍 Search</a>
   </div>
